@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using wsapicaixa.Context;
+using wsapicaixa.Repository;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,10 +15,13 @@ string mysqlConnection = builder.Configuration.GetConnectionString("DefaultConne
 builder.Services.AddDbContext<AppDbContext>(options =>
 options.UseMySql(mysqlConnection, ServerVersion.AutoDetect(mysqlConnection)));
 
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 builder.Services.AddCors();
 
 var app = builder.Build();
+
+
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

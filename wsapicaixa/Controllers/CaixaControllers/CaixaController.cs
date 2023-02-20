@@ -1,9 +1,6 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using System.Diagnostics;
-using wsapicaixa.Context;
+﻿using Microsoft.AspNetCore.Mvc;
 using wsapicaixa.Models.CaixaModel;
+using wsapicaixa.Repository;
 
 namespace wsapicaixa.Controllers.CaixaControllers;
 
@@ -12,20 +9,20 @@ namespace wsapicaixa.Controllers.CaixaControllers;
 public class CaixaController : ControllerBase
 {
 
-    private readonly AppDbContext _context;
+    private readonly IUnitOfWork uof;
 
-    public CaixaController(AppDbContext context)
+    public CaixaController(IUnitOfWork context)
     {
-        _context = context;
+        uof = context;
     }
 
     [HttpGet]
 
-    public async Task<ActionResult<IEnumerable<Caixa>>> Get()
+    public ActionResult<IEnumerable<Caixa>> Get()
     {
         try
         {
-            var caixas = await _context.Caixas.AsNoTracking().ToListAsync();
+            var caixas =  uof.CaixaRepository.GetAll().ToList();
 
             if (caixas is null)
             {
@@ -42,12 +39,12 @@ public class CaixaController : ControllerBase
     }
 
     [HttpGet("{id}", Name = "ListOneCaixa")]
-    public async Task<ActionResult<Caixa>> Get(string id)
+    public ActionResult<Caixa> Get(string id)
     {
 
         try
         {
-            var caixa = await _context.Caixas.FirstOrDefaultAsync(c => c.Id == id);
+            var caixa = uof.CaixaRepository.GetById(_caixa => _caixa.Id == id);
 
             if (caixa is null)
             {
@@ -67,7 +64,7 @@ public class CaixaController : ControllerBase
     }
 
     [HttpPost]
-    public ActionResult Post(Caixa caixa)
+    public ActionResult Post([FromBody] Caixa caixa)
     {
 
         try
@@ -82,8 +79,8 @@ public class CaixaController : ControllerBase
 
             caixa.Id = idAsString;
 
-            _context.Caixas.Add(caixa);
-            _context.SaveChanges();
+            uof.CaixaRepository.Add(caixa);
+            uof.Commit();
 
             return new CreatedAtRouteResult("ListOneCaixa", new { id = caixa.Id }, caixa);
         }
@@ -96,7 +93,7 @@ public class CaixaController : ControllerBase
     }
 
     [HttpPut("{id}")]
-    public ActionResult Put(string id, Caixa caixa)
+    public ActionResult Put(string id,[FromBody] Caixa caixa)
     {
 
         try
@@ -106,9 +103,9 @@ public class CaixaController : ControllerBase
                 return BadRequest("ID Não correspondente ao dado a ser alterado");
             }
 
-            _context.Entry(caixa).State = EntityState.Modified;
+            uof.CaixaRepository.Update(caixa);
 
-            _context.SaveChanges();
+            uof.Commit();
 
             return Ok(caixa);
         }
@@ -128,15 +125,15 @@ public class CaixaController : ControllerBase
 
         try
         {
-            var caixa = _context.Caixas.FirstOrDefault(c => c.Id == id);
+            var caixa = uof.CaixaRepository.GetById(_caixa => _caixa.Id == id);
 
             if (caixa is null)
             {
                 return NotFound("Caixa não encontrado para deletar");
             }
 
-            _context.Caixas.Remove(caixa);
-            _context.SaveChanges();
+            uof.CaixaRepository.Delete(caixa);
+            uof.Commit();
 
             return Ok(caixa);
         }
