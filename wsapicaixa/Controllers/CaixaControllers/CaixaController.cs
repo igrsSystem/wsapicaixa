@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Mvc;
+using wsapicaixa.DTOs.CaixaDTOs;
 using wsapicaixa.Models.CaixaModel;
 using wsapicaixa.Repository;
 
@@ -10,26 +12,30 @@ public class CaixaController : ControllerBase
 {
 
     private readonly IUnitOfWork uof;
+    private readonly IMapper _mapper;
 
-    public CaixaController(IUnitOfWork context)
+    public CaixaController(IUnitOfWork context, IMapper mapper)
     {
         uof = context;
+        _mapper = mapper;   
     }
 
     [HttpGet]
 
-    public ActionResult<IEnumerable<Caixa>> Get()
+    public ActionResult<IEnumerable<CaixaDTO>> Get()
     {
         try
         {
-            var caixas =  uof.CaixaRepository.GetAll().ToList();
+            var caixas =  uof.CaixaRepository.GetAll().ToList(); 
 
             if (caixas is null)
             {
                 return NotFound("Não existe caixas cadastrados");
             }
 
-            return caixas;
+            var caixasDto = _mapper.Map<List<CaixaDTO>>(caixas);
+
+            return caixasDto;
         }
         catch (Exception)
         {
@@ -39,19 +45,22 @@ public class CaixaController : ControllerBase
     }
 
     [HttpGet("{id}", Name = "ListOneCaixa")]
-    public ActionResult<Caixa> Get(string id)
+    public ActionResult<CaixaDTO> Get(string id)
     {
 
         try
         {
             var caixa = uof.CaixaRepository.GetById(_caixa => _caixa.Id == id);
+          
 
             if (caixa is null)
             {
                 return NotFound("Caixa Não Encontrado");
             }
 
-            return caixa;
+            var caixaDto = _mapper.Map<CaixaDTO>(caixa);
+
+            return caixaDto;
         }
         catch (Exception)
         {
@@ -64,11 +73,13 @@ public class CaixaController : ControllerBase
     }
 
     [HttpPost]
-    public ActionResult Post([FromBody] Caixa caixa)
+    public ActionResult Post([FromBody] CaixaCreateDTO caixaCreateDto)
     {
 
         try
         {
+            var caixa = _mapper.Map<Caixa>(caixaCreateDto);
+
             if (caixa is null)
             {
                 return BadRequest();
@@ -82,7 +93,9 @@ public class CaixaController : ControllerBase
             uof.CaixaRepository.Add(caixa);
             uof.Commit();
 
-            return new CreatedAtRouteResult("ListOneCaixa", new { id = caixa.Id }, caixa);
+            var caixaCreateDTO = _mapper.Map<CaixaCreateDTO>(caixa);
+
+            return new CreatedAtRouteResult("ListOneCaixa", new { id = caixa.Id }, caixaCreateDTO);
         }
         catch (Exception)
         {
@@ -93,15 +106,18 @@ public class CaixaController : ControllerBase
     }
 
     [HttpPut("{id}")]
-    public ActionResult Put(string id,[FromBody] Caixa caixa)
+    public ActionResult Put(string id,[FromBody] CaixaDTO caixaDto)
     {
 
         try
         {
-            if (id != caixa.Id)
+
+            if (id != caixaDto.Id)
             {
                 return BadRequest("ID Não correspondente ao dado a ser alterado");
             }
+
+            var caixa = _mapper.Map<Caixa>(caixaDto);
 
             uof.CaixaRepository.Update(caixa);
 
@@ -120,7 +136,7 @@ public class CaixaController : ControllerBase
 
     [HttpDelete("{id}")]
 
-    public ActionResult Delete(string id)
+    public ActionResult<CaixaDTO> Delete(string id)
     {
 
         try
@@ -135,7 +151,9 @@ public class CaixaController : ControllerBase
             uof.CaixaRepository.Delete(caixa);
             uof.Commit();
 
-            return Ok(caixa);
+            var caixaDTO = _mapper.Map<CaixaDTO>(caixa);
+
+            return Ok(caixaDTO);
         }
         catch (Exception)
         {

@@ -1,11 +1,13 @@
 {
   "version": 2,
-  "dgSpecHash": "BqQtPUnYJqAdsD8c/C+WdT9O8mnZ9e6kSqYuibK8EJKyWH4MOnaFvzwfZOMO+9uwel40/FAuQ5w40c67sEvbpQ==",
+  "dgSpecHash": "F5erkhx+6gXsxgWOfL4AFoggE2mUWRVxD2p5Pozq/J7ZtOEq19AfbwKT1ux1sKVlytBtxc3Epc4nM8YA91mwfw==",
   "success": true,
   "projectFilePath": "C:\\Project-NET\\PROJECT-API1\\wsapicaixa\\wsapicaixa\\wsapicaixa.csproj",
   "expectedPackageFiles": [
+    "C:\\Users\\igors\\.nuget\\packages\\automapper\\12.0.1\\automapper.12.0.1.nupkg.sha512",
+    "C:\\Users\\igors\\.nuget\\packages\\automapper.extensions.microsoft.dependencyinjection\\6.1.1\\automapper.extensions.microsoft.dependencyinjection.6.1.1.nupkg.sha512",
     "C:\\Users\\igors\\.nuget\\packages\\humanizer.core\\2.8.26\\humanizer.core.2.8.26.nupkg.sha512",
-    "C:\\Users\\igors\\.nuget\\packages\\microsoft.csharp\\4.5.0\\microsoft.csharp.4.5.0.nupkg.sha512",
+    "C:\\Users\\igors\\.nuget\\packages\\microsoft.csharp\\4.7.0\\microsoft.csharp.4.7.0.nupkg.sha512",
     "C:\\Users\\igors\\.nuget\\packages\\microsoft.data.sqlclient\\2.1.4\\microsoft.data.sqlclient.2.1.4.nupkg.sha512",
     "C:\\Users\\igors\\.nuget\\packages\\microsoft.data.sqlclient.sni.runtime\\2.1.1\\microsoft.data.sqlclient.sni.runtime.2.1.1.nupkg.sha512",
     "C:\\Users\\igors\\.nuget\\packages\\microsoft.entityframeworkcore\\6.0.13\\microsoft.entityframeworkcore.6.0.13.nupkg.sha512",

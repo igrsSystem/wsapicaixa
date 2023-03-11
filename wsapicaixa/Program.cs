@@ -1,6 +1,8 @@
+using AutoMapper;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
+//using Microsoft.Extensions.Options;
 using wsapicaixa.Context;
+using wsapicaixa.DTOs.Mappings;
 using wsapicaixa.Repository;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -16,6 +18,15 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 options.UseMySql(mysqlConnection, ServerVersion.AutoDetect(mysqlConnection)));
 
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+var mappingConfig = new MapperConfiguration(mc =>
+{
+    mc.AddProfile(new MappingProfile());
+});
+
+IMapper mapper = mappingConfig.CreateMapper();
+
+builder.Services.AddSingleton(mapper);
 
 builder.Services.AddCors();
 
