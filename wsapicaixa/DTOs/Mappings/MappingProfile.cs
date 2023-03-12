@@ -14,5 +14,6 @@ public class MappingProfile:Profile
         CreateMap<Caixa, CaixaCreateDTO>().ReverseMap();
 
         CreateMap<Fornecedor, FornecedorDTO>().ReverseMap();
+        CreateMap<Fornecedor, FornecedorCreateDTO>().ReverseMap();
     }
 }

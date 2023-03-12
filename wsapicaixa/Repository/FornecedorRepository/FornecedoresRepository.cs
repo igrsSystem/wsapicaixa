@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using wsapicaixa.Context;
 using wsapicaixa.Models.FornecedorModel;
 
@@ -13,6 +14,15 @@ public class FornecedoresRepository: Repository<Fornecedor>,IFornecedoresReposit
     public IEnumerable<Fornecedor> GetAll()
     {
         return Get().OrderBy(fornecedor => fornecedor.Banco).ToList();
-        ///return Get().Include()
+       
+    }
+
+    public ActionResult<Fornecedor> GetCpf(string Cpf)
+    {
+    
+        var fornecedor =  _context.Fornecedores.AsNoTracking().FirstOrDefault(findFornecedor => findFornecedor.Cpf == Cpf);
+        
+        return fornecedor;
+      
     }
 }

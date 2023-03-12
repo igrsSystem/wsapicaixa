@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using wsapicaixa.Context;
 using wsapicaixa.Models;
 using wsapicaixa.Models.FornecedorModel;
-
+using wsapicaixa.Repository;
 
 namespace wsapicaixa.Controllers.FornecedorControllers;
 
@@ -12,18 +12,18 @@ namespace wsapicaixa.Controllers.FornecedorControllers;
 public class FornecedorController : ControllerBase
 {
     private readonly AppDbContext _context;
-
-    public FornecedorController(AppDbContext context)
+    private readonly IUnitOfWork uof;
+    public FornecedorController(IUnitOfWork context)
     {
-        _context = context;
+        uof = context;
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Fornecedor>>> Get()
+    public  ActionResult<IEnumerable<Fornecedor>> Get()
     {
         try
         {
-            var fornecedores = await _context.Fornecedores.ToListAsync();
+            var fornecedores =  uof.FornecedorRepository.GetAll().ToList();
 
             if (fornecedores is null)
             {
@@ -40,13 +40,13 @@ public class FornecedorController : ControllerBase
     }
 
 
-    [HttpGet("id")]
-    public async Task<ActionResult<Fornecedor>> Get(string id) 
+    [HttpGet("id", Name = "ListOneFornecedor")]
+    public ActionResult<Fornecedor> Get(string id) 
     {
 
         try
         {
-            var fornecedor = await _context.Fornecedores.FirstOrDefaultAsync(f => f.Id == id);
+            var fornecedor =  uof.FornecedorRepository.GetById(f => f.Id == id);
 
             if (fornecedor is null)
             {
@@ -73,9 +73,9 @@ public class FornecedorController : ControllerBase
                 return BadRequest();
             }
 
-            var verificaFornecedor = _context.Fornecedores.FirstOrDefault(f => f.Cpf == fornecedor.Cpf);
+            var verificaFornecedor = uof.FornecedorRepository.GetCpf(fornecedor.Cpf);
 
-            if (verificaFornecedor is not null)
+            if (verificaFornecedor.Value is not null)
             {
                 return BadRequest($"Forncedor com esse CFP={fornecedor.Cpf} já cadastrado...");
             }
@@ -85,8 +85,8 @@ public class FornecedorController : ControllerBase
 
             fornecedor.Id = idAsString;
 
-            _context.Fornecedores.Add(fornecedor);
-            _context.SaveChanges();
+            uof.FornecedorRepository.Add(fornecedor);
+            uof.Commit();
 
             return new CreatedAtRouteResult("ListOneFornecedor", new { id = fornecedor.Id }, fornecedor);
         }
@@ -110,18 +110,16 @@ public class FornecedorController : ControllerBase
                 return BadRequest("ID Não correspondente ao dado a ser alterado");
             }
 
-            /*
-             * var verificaFornecedor = _context.Fornecedores.FirstOrDefault(f => f.Cpf == fornecedor.Cpf);
+             var verificaFornecedor =  uof.FornecedorRepository.GetCpf(fornecedor.Cpf);
 
-            if (verificaFornecedor is not null)
+            if (verificaFornecedor.Value is not null && (verificaFornecedor.Value.Id != id))
             {
-                return BadRequest("Forncedor com esse CFP já cadastrado...");
+                return BadRequest("Forncedor com esse CPF já cadastrado...");
             } 
-            */
-
-            _context.Entry(fornecedor).State = EntityState.Modified;
-
-            _context.SaveChanges();
+            
+            uof.FornecedorRepository.Update(fornecedor);
+         
+            uof.Commit();
 
             return Ok(fornecedor);
 
@@ -141,15 +139,16 @@ public class FornecedorController : ControllerBase
 
         try
         {
-            var fornecedor = _context.Fornecedores.FirstOrDefault(c => c.Id == id);
+
+            var fornecedor = uof.FornecedorRepository.GetById(c => c.Id == id);
 
             if (fornecedor is null)
             {
-                return NotFound("Caixa não encontrado para deletar");
+                return NotFound("Fornecedor não encontrado para deletar");
             }
 
-            _context.Fornecedores.Remove(fornecedor);
-            _context.SaveChanges();
+            uof.FornecedorRepository.Delete(fornecedor);
+            uof.Commit();
 
             return Ok(fornecedor);
         }
