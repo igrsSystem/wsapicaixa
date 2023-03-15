@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using wsapicaixa.Context;
 using wsapicaixa.DTOs.Mappings;
 using wsapicaixa.Repository;
+using wsapicaixa.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,6 +19,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 options.UseMySql(mysqlConnection, ServerVersion.AutoDetect(mysqlConnection)));
 
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+builder.Services.AddScoped<IMessageProducer, RabbitMQProducer>();
 
 var mappingConfig = new MapperConfiguration(mc =>
 {

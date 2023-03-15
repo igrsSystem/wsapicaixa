@@ -6,6 +6,7 @@ namespace wsapicaixa.Models.FornecedorModel;
 public class Fornecedor
 {
     [Key]
+    [StringLength(36)]
     public string? Id { get; set; }
 
     [Required]

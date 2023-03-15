@@ -128,3 +128,5 @@ C:\Project-NET\PROJECT-API1\wsapicaixa\wsapicaixa\obj\Debug\net6.0\wsapicaixa.ge
 C:\Project-NET\PROJECT-API1\wsapicaixa\wsapicaixa\obj\Debug\net6.0\ref\wsapicaixa.dll
 C:\Project-NET\PROJECT-API1\wsapicaixa\wsapicaixa\bin\Debug\net6.0\AutoMapper.dll
 C:\Project-NET\PROJECT-API1\wsapicaixa\wsapicaixa\bin\Debug\net6.0\AutoMapper.Extensions.Microsoft.DependencyInjection.dll
+C:\Project-NET\PROJECT-API1\wsapicaixa\wsapicaixa\bin\Debug\net6.0\RabbitMQ.Client.dll
+C:\Project-NET\PROJECT-API1\wsapicaixa\wsapicaixa\bin\Debug\net6.0\Newtonsoft.Json.dll

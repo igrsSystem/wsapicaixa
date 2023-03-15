@@ -1,9 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using wsapicaixa.Context;
-using wsapicaixa.Models;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Mvc;
+using wsapicaixa.DTOs.CaixaDTOs;
+using wsapicaixa.DTOs.FornecedorDTOs;
+using wsapicaixa.Models.CaixaModel;
 using wsapicaixa.Models.FornecedorModel;
 using wsapicaixa.Repository;
+using wsapicaixa.Services;
 
 namespace wsapicaixa.Controllers.FornecedorControllers;
 
@@ -11,15 +13,19 @@ namespace wsapicaixa.Controllers.FornecedorControllers;
 [ApiController]
 public class FornecedorController : ControllerBase
 {
-    private readonly AppDbContext _context;
+
     private readonly IUnitOfWork uof;
-    public FornecedorController(IUnitOfWork context)
+    private readonly IMapper _mapper;
+    private readonly IMessageProducer _messagePublisher;
+    public FornecedorController(IUnitOfWork context, IMapper mapper, IMessageProducer messagePublisher)
     {
         uof = context;
+        _mapper = mapper;
+        _messagePublisher = messagePublisher;   
     }
 
     [HttpGet]
-    public  ActionResult<IEnumerable<Fornecedor>> Get()
+    public  ActionResult<IEnumerable<FornecedorDTO>> Get()
     {
         try
         {
@@ -30,7 +36,11 @@ public class FornecedorController : ControllerBase
                 return NotFound("Não existe fornecedores cadastrados");
             }
 
-            return fornecedores;
+            var fornecedoresDto = _mapper.Map<List<FornecedorDTO>>(fornecedores);
+
+            _messagePublisher.SendMessage(fornecedores);
+
+            return fornecedoresDto;
         }
         catch (Exception)
         {
@@ -41,7 +51,7 @@ public class FornecedorController : ControllerBase
 
 
     [HttpGet("id", Name = "ListOneFornecedor")]
-    public ActionResult<Fornecedor> Get(string id) 
+    public ActionResult<FornecedorDTO> Get(string id) 
     {
 
         try
@@ -52,7 +62,10 @@ public class FornecedorController : ControllerBase
             {
                 return NotFound("Não existe fornecedores cadastrados");
             }
-            return fornecedor;
+
+            var fornecedorDto = _mapper.Map<FornecedorDTO>(fornecedor);
+
+            return fornecedorDto;
         }
         catch (Exception)
         {
@@ -63,11 +76,14 @@ public class FornecedorController : ControllerBase
 
     [HttpPost]
 
-    public ActionResult Post(Fornecedor fornecedor)
+    public ActionResult Post([FromBody] FornecedorCreateDTO fornecedorCreateDto)
     {
 
         try
         {
+
+            var fornecedor = _mapper.Map<Fornecedor>(fornecedorCreateDto);
+
             if (fornecedor is null)
             {
                 return BadRequest();
@@ -88,7 +104,11 @@ public class FornecedorController : ControllerBase
             uof.FornecedorRepository.Add(fornecedor);
             uof.Commit();
 
-            return new CreatedAtRouteResult("ListOneFornecedor", new { id = fornecedor.Id }, fornecedor);
+            var fornecedorCreateDTO = _mapper.Map<FornecedorCreateDTO>(fornecedor);
+
+            _messagePublisher.SendMessage(fornecedor);
+
+            return new CreatedAtRouteResult("ListOneFornecedor", new { id = fornecedor.Id }, fornecedorCreateDTO);
         }
         catch (Exception)
         {
@@ -99,18 +119,20 @@ public class FornecedorController : ControllerBase
     }
 
     [HttpPut("{id}")]
-    public ActionResult Put(string id, Fornecedor fornecedor)
+    public ActionResult Put(string id, FornecedorDTO fornecedorDto)
     {
 
         try
         {
 
-            if (id != fornecedor.Id)
+            if (id != fornecedorDto.Id)
             {
                 return BadRequest("ID Não correspondente ao dado a ser alterado");
             }
 
-             var verificaFornecedor =  uof.FornecedorRepository.GetCpf(fornecedor.Cpf);
+            var fornecedor = _mapper.Map<Fornecedor>(fornecedorDto);
+
+            var verificaFornecedor =  uof.FornecedorRepository.GetCpf(fornecedor.Cpf);
 
             if (verificaFornecedor.Value is not null && (verificaFornecedor.Value.Id != id))
             {
@@ -134,7 +156,7 @@ public class FornecedorController : ControllerBase
 
     [HttpDelete("{id}")]
 
-    public ActionResult Delete(string id)
+    public ActionResult<FornecedorDTO> Delete(string id)
     {
 
         try
@@ -150,7 +172,9 @@ public class FornecedorController : ControllerBase
             uof.FornecedorRepository.Delete(fornecedor);
             uof.Commit();
 
-            return Ok(fornecedor);
+            var fornecedorDTO = _mapper.Map<FornecedorDTO>(fornecedor);
+
+            return Ok(fornecedorDTO);
         }
         catch (Exception)
         {
